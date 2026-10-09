@@ -253,6 +253,13 @@ def test_all_pages_demo_project():
     st.session_state.qc_thresholds  # noqa: B018
     state.run_all()
     check("run_all produced results for both prospects", len(st.session_state.runs) == 2, str(st.session_state.runs.keys()))
+    alpha_fp = state.prospect_fp(state.project(), "Alpha")
+    state.project().prospect("Bravo").segments[0].notes = "unrelated change"
+    check("prospect fingerprint ignores unrelated prospects",
+          state.prospect_fp(state.project(), "Alpha") == alpha_fp)
+    state.project().prospect("Alpha").segments[0].notes = "relevant change"
+    check("prospect fingerprint tracks its own model",
+          state.prospect_fp(state.project(), "Alpha") != alpha_fp)
     fns = {"Project": page_model.page_project, "Prospects": page_model.page_prospects,
            "Results": page_analysis.page_results, "Sensitivity": page_analysis.page_sensitivity,
            "Portfolio": page_analysis.page_portfolio, "Quality control": page_output.page_qc,

@@ -327,7 +327,9 @@ def _matrix_or_none(m, k):
     if m is None:
         return None
     arr = np.asarray(m, float)
-    return arr if arr.shape == (k, k) else None
+    if arr.shape != (k, k):
+        raise ProjectError(f"Dependency matrix must be {k}×{k}")
+    return arr
 
 
 def run_prospect(project: Project, name: str, segment_runs: dict[str, SegmentRun] | None = None) -> ProspectRun:

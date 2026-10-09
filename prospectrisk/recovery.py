@@ -70,8 +70,16 @@ def _pos(name: str, v) -> np.ndarray:
     return a
 
 
+def _fraction(name: str, v) -> np.ndarray:
+    a = np.asarray(v, float)
+    if np.any(~np.isfinite(a)) or np.any((a <= 0) | (a >= 1)):
+        raise RecoveryError(f"{name} must be a fraction between 0 and 1")
+    return a
+
+
 def api_water_drive(phi, sw, boi, k_md, mu_w, mu_o, p_i, p_a) -> np.ndarray:
-    phi, sw, boi, k = _pos("Porosity", phi), _pos("Water saturation", sw), _pos("Bo", boi), _pos("Permeability", k_md)
+    phi, sw, boi, k = _fraction("Porosity", phi), _fraction("Water saturation", sw), \
+        _pos("Bo", boi), _pos("Permeability", k_md)
     mu_w, mu_o, p_i, p_a = _pos("Water viscosity", mu_w), _pos("Oil viscosity", mu_o), _pos("Initial pressure", p_i), \
         _pos("Abandonment pressure", p_a)
     rf = 0.54898 * (phi * (1 - sw) / boi) ** 0.0422 * (k / 1000.0 * mu_w / mu_o) ** 0.0770 * sw ** -0.1903 \
@@ -80,7 +88,8 @@ def api_water_drive(phi, sw, boi, k_md, mu_w, mu_o, p_i, p_a) -> np.ndarray:
 
 
 def api_solution_gas(phi, sw, bob, k_md, mu_ob, p_b, p_a) -> np.ndarray:
-    phi, sw, bob, k = _pos("Porosity", phi), _pos("Water saturation", sw), _pos("Bo", bob), _pos("Permeability", k_md)
+    phi, sw, bob, k = _fraction("Porosity", phi), _fraction("Water saturation", sw), \
+        _pos("Bo", bob), _pos("Permeability", k_md)
     mu_ob, p_b, p_a = _pos("Oil viscosity", mu_ob), _pos("Bubble-point pressure", p_b), _pos("Abandonment pressure", p_a)
     rf = 0.41815 * (phi * (1 - sw) / bob) ** 0.1611 * (k / 1000.0 / mu_ob) ** 0.0979 * sw ** 0.3722 \
         * (p_b / p_a) ** 0.1741
@@ -89,8 +98,9 @@ def api_solution_gas(phi, sw, bob, k_md, mu_ob, p_b, p_a) -> np.ndarray:
 
 def guthrie_greenberger(k_md, sw, mu_o, phi, h_ft) -> np.ndarray:
     k, mu_o = _pos("Permeability", k_md), _pos("Oil viscosity", mu_o)
-    rf = 0.2719 * np.log10(k) + 0.25569 * np.asarray(sw, float) - 0.1355 * np.log10(mu_o) \
-        - 1.538 * np.asarray(phi, float) - 0.00035 * np.asarray(h_ft, float) + 0.11403
+    sw, phi = _fraction("Water saturation", sw), _fraction("Porosity", phi)
+    rf = 0.2719 * np.log10(k) + 0.25569 * sw - 0.1355 * np.log10(mu_o) \
+        - 1.538 * phi - 0.00035 * np.asarray(h_ft, float) + 0.11403
     return np.clip(rf, 0.0, 1.0)
 
 
