@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+from dataclasses import asdict
 
 import streamlit as st
 
@@ -43,8 +44,7 @@ def _md5(obj) -> str:
 
 def prospect_fp(p: Project, name: str) -> str:
     pr = p.prospect(name)
-    d = p.to_dict()
-    return _md5([d["settings"], d["adequacy_matrix"], p.play(pr.play).to_dict(), pr.to_dict()])
+    return _md5([asdict(p.settings), p.adequacy_matrix, p.play(pr.play).to_dict(), pr.to_dict()])
 
 
 def portfolio_fp(p: Project, names: list[str]) -> str:

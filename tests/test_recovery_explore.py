@@ -41,6 +41,12 @@ def test_guthrie_greenberger_and_solution_gas():
     check("GG clipped at zero for tight rock", float(RF.guthrie_greenberger(0.01, 0.2, 5, 0.3, 300)) == 0.0)
     raises("negative permeability rejected", lambda: RF.api_water_drive(0.2, 0.2, 1.2, -1, 0.5, 1, 4000, 1000),
            RF.RecoveryError)
+    raises("porosity above one rejected", lambda: RF.api_water_drive(1.1, 0.2, 1.2, 100, 0.5, 1, 4000, 1000),
+           RF.RecoveryError)
+    raises("water saturation above one rejected",
+           lambda: RF.api_solution_gas(0.2, 1.1, 1.2, 100, 1, 3000, 500), RF.RecoveryError)
+    raises("invalid Guthrie-Greenberger saturation rejected",
+           lambda: RF.guthrie_greenberger(100, 1.0, 2, 0.2, 100), RF.RecoveryError)
     raises("abandonment above initial pressure rejected",
            lambda: RF.OilBenchmarkInputs(p_i=1000, p_a=2000).validate(), RF.RecoveryError)
     df = RF.curves(p, 1, 1000, 30)

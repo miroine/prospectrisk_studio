@@ -195,6 +195,9 @@ def test_project_level_dependencies_and_truncation():
     check("dependencies and truncation round-trip through YAML", rt.to_dict() == p.to_dict())
     pr.input_dependencies = [{"seg_a": "Nope", "var_a": "bo", "seg_b": "Lower sand", "var_b": "bo", "kind": "link"}]
     raises("unknown segment in dependency rejected", lambda: run_prospect(p, "Alpha"), ProjectError)
+    pr.input_dependencies = []
+    pr.segment_dependency = [[1.0]]
+    raises("wrong-size segment dependency matrix rejected", lambda: run_prospect(p, "Alpha"), ProjectError)
 
 
 # ---- units --------------------------------------------------------------------------------------------------

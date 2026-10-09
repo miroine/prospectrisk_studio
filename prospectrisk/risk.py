@@ -185,9 +185,10 @@ def expectation_curve(success_volumes: np.ndarray, chance: float = 1.0, n_points
     n = v.size
     if n == 0:
         return np.array([0.0]), np.array([0.0])
-    exc = 1.0 - np.arange(n) / n
-    if n > n_points:
-        idx = np.unique(np.linspace(0, n - 1, n_points).astype(int))
+    v, first = np.unique(v, return_index=True)
+    exc = (n - first) / n
+    if v.size > n_points:
+        idx = np.unique(np.linspace(0, v.size - 1, n_points).astype(int))
         v, exc = v[idx], exc[idx]
     return v, chance * exc
 
